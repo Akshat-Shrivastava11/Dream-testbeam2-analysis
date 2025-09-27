@@ -1,6 +1,7 @@
 import uproot
 import matplotlib.pyplot as plt
 import numpy as np
+import os 
 
 muoncounter = "DRS_Board7_Group2_Channel4"
 def integrate_waveforms(events, window=100, baseline_samples=20):
@@ -94,7 +95,7 @@ def analyze_muon_contamination(
     plt.legend()
     plt.tight_layout()
 
-    out_file = f"Muoncounts_for_{run_number}_energy_{beam_energy.replace(' ', '_')}.pdf"
+    out_file = f"/lustre/research/hep/akshriva/Dream-testbeam2-analysis/plots_muoncontamination/Muoncounts_for_{run_number}_energy_{beam_energy.replace(' ', '_')}.pdf"
     plt.savefig(out_file)
     plt.close()
 
@@ -106,5 +107,88 @@ def analyze_muon_contamination(
 
 # Example usage:
 # file_path = "data_testbeam/testbeam_round2/run1355_250924165834_converted.root"
-file_path = "data_testbeam/testbeam_round2/run1355_250924165834_converted.root"
-analyze_muon_contamination(file_path, muoncounter, run_number="1355", position="#1", beam_energy="80GeV positrons")
+#file_path = "data_testbeam/testbeam_round2/run1355_250924165834_converted.root"
+
+
+basedir = '/lustre/research/hep/jdamgov/HG-DREAM/CERN/ROOT/'
+
+positron_files = {
+    'run1410_250925145231.root': '100',
+    'run1411_250925154340.root': '120',
+    'run1422_250926102502.root': '110',
+    'run1409_250925135843.root': '80',
+    'run1412_250925174602.root': '60',
+    'run1415_250925192957.root': '40',
+    'run1416_250925230347.root': '30',
+    'run1423_250926105310.root': '20',
+    'run1424_250926124313.root': '10',
+}
+
+pion_files = {
+    
+    'run1433_250926213442.root': '120',
+    'run1432_250926203416.root': '100',
+    'run1434_250926222520.root': '160',
+    'run1429_250926183919.root': '80',
+    'run1437_250927003120.root': '60',
+    'run1438_250927012632.root': '40',
+    'run1439_250927023319.root': '30',
+    'run1441_250927033539.root': '20',
+    'run1442_250927050848.root': '10',
+}
+
+
+muon_files = {
+    'run1447_250927084726.root': '170',
+    'run1445_250927074156.root': '110',
+}
+
+
+def collect_results(files_dict, particle_label):
+    muon_contaminations = []
+    energys = []
+    results = {}
+
+    for fname, energy in files_dict.items():
+        file_path = os.path.join(basedir, fname)
+
+        run_number = fname.split('_')[0].replace("run", "")
+
+        integrals, muon_contamination = analyze_muon_contamination(
+            file_path,
+            muoncounter,
+            run_number=run_number,
+            position="#1",
+            beam_energy=f"{energy}GeV {particle_label}"
+        )
+
+        muon_contaminations.append(muon_contamination)
+        energys.append(int(energy))
+        results[run_number] = {
+            "energy": energy,
+            "integrals": integrals,
+            "muon_contamination": muon_contamination
+        }
+
+    energies = np.array(energys)
+    contaminations = np.array(muon_contaminations)
+
+    sort_idx = np.argsort(energies)
+    return energies[sort_idx], contaminations[sort_idx], results
+
+# Collect for both
+energies_pos, cont_pos, results_pos = collect_results(positron_files, "positrons")
+energies_pi, cont_pi, results_pi = collect_results(pion_files, "pions")
+energies_mu, cont_mu, results_mu = collect_results(muon_files, "muons")
+# Plot together
+plt.figure(figsize=(8,6))
+plt.plot(energies_pos, cont_pos, marker='o', linestyle='-', color='g', label="Positrons")
+plt.plot(energies_pi, cont_pi, marker='s', linestyle='--', color='r', label="Pions")
+plt.plot(energies_mu, cont_mu, marker='^', linestyle=':', color='b', label="Muons")
+plt.xlabel("Beam Energy [GeV]", fontsize=14)
+plt.ylabel("Muon Contamination ", fontsize=14)
+plt.title("Muon Contamination vs Beam Energy", fontsize=16)
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.legend()
+plt.tight_layout()
+plt.savefig("muoncontamination_testbeam02_pos_&_pi.pdf")

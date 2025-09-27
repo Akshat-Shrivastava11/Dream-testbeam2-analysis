@@ -2,38 +2,7 @@ import uproot
 import matplotlib.pyplot as plt
 import numpy as np
 
-# file_path = "data_testbeam/testbeam_round2/run1355_250924165834_converted.root"
-# muoncounter = "DRS_Board7_Group2_Channel4"
-# run_number = '1355'
-# position = '#1'
-# beam_energy = '80GeV positrons'
-
-# file_path = '/lustre/work/akshriva/Dream/testbeam02/data_testbeam/testbeam_round2/run1410_250925145231.root'
-# muoncounter = "DRS_Board7_Group2_Channel4"
-# run_number = '1410'
-# position = '#3'
-# beam_energy = '80GeV positrons'
-
-# file_path = 'data_testbeam/testbeam_round2/run1431_250926195104.root'
-# muoncounter = "DRS_Board7_Group2_Channel4"
-# run_number = '1431'
-# position = '#1'
-# beam_energy = '100 GeV pions+'
-
-file_path = 'data_testbeam/testbeam_round2/run1420_250926093800.root'
 muoncounter = "DRS_Board7_Group2_Channel4"
-run_number = '1420'
-position = '#1'
-beam_energy = '110 GeV muons+'
-
-with uproot.open(file_path) as f:
-    tree = f["EventTree"]
-    events = tree[muoncounter].array(library="np")  # object array
-
-print(f"Loaded {len(events)} events.")
-
-import numpy as np
-
 def integrate_waveforms(events, window=100, baseline_samples=20):
     """
     Compute baseline-corrected integrals for each waveform in events.
@@ -49,8 +18,8 @@ def integrate_waveforms(events, window=100, baseline_samples=20):
 
     Returns
     -------
-    integrals : list of floats
-        List of integrated (negative) areas for each waveform.
+    integrals : ndarray
+        Array of integrated (positive) areas for each waveform.
     """
     integrals = []
     for event in events:
@@ -62,56 +31,80 @@ def integrate_waveforms(events, window=100, baseline_samples=20):
         start = max(0, peak_index - window)
         end   = min(len(corrected), peak_index + window)
 
-        #area = np.trapz(corrected[start:end], dx=1)
         area = np.trapezoid(corrected[start:end], dx=1)
-        integrals.append(-area)
+        integrals.append(-area)  # flip sign so negative pulses → positive area
 
-    return integrals
-
-
-# Compute integral (area) for each waveform
-integrals = []
-window = 100 # samples around the minimum to integrate
-for event in events:
-    #print(f'Processing event with {len(event)} samples')
-    event_np = np.array(event)
-    baseline = np.mean(event_np[:20])      # average of first 20 samples
-    corrected = event_np - baseline        # baseline subtraction
-    peak_index = np.argmin(corrected)
-    
-    # Define integration window
-    start = max(0, peak_index - window)
-    end   = min(len(corrected), peak_index + window)
-    
-    # Integrate only in that window
-    area = np.trapz(corrected[start:end], dx=1)
-    integrals.append(-area)
+    return np.array(integrals)
 
 
-integrals = np.array(integrals)
-print(f"First 10 integrals: {integrals[:10]}")
+def analyze_muon_contamination(
+    file_path, muoncounter, run_number, position, beam_energy,
+    window=100, baseline_samples=20, threshold=5000
+):
+    """
+    Load a ROOT file, compute waveform integrals, and make histogram with muon contamination.
 
-# Optional: plot histogram of waveform integrals
-noise  = integrals[integrals <= 5000]
-muons = integrals[integrals > 5000]
-muon_contamination = len(muons) / len(integrals)
-plt.figure(figsize=(8,5))
+    Parameters
+    ----------
+    file_path : str
+        Path to the ROOT file.
+    muoncounter : str
+        Branch name for the muon counter waveform.
+    run_number : str
+        Run identifier for labeling plots.
+    position : str
+        Detector position label.
+    beam_energy : str
+        Beam energy and particle type string for labeling.
+    window : int
+        Integration window half-width around peak (default: 100).
+    baseline_samples : int
+        Number of samples for baseline estimation (default: 20).
+    threshold : float
+        Integral threshold for muon identification (default: 5000).
+    """
+    # Load events
+    with uproot.open(file_path) as f:
+        tree = f["EventTree"]
+        events = tree[muoncounter].array(library="np")
 
-# Plot low integrals (gray)
-plt.hist(noise, bins=1000, histtype="stepfilled", 
-         color='gray', alpha=0.5, label="Noise")
+    print(f"Loaded {len(events)} events from {file_path}")
 
-# Plot high integrals (blue, overlaid)
-plt.hist(muons, bins=1000, histtype="stepfilled", 
-         color='blue', alpha=0.7, label=f"Muons , contamination = {muon_contamination:.2%}")
+    # Compute integrals
+    integrals = integrate_waveforms(events, window=window, baseline_samples=baseline_samples)
 
-plt.xlabel("Integrated ADC (area)")
-plt.ylabel("Number of events")
-plt.title(f"Muon counter waveform integrals\nRun {run_number}, {beam_energy}")
-plt.yscale('log')
-plt.legend()
-plt.tight_layout()
-plt.savefig(f"Muoncounts_for_{run_number}_energy_{beam_energy}.pdf")
-plt.close()
+    # Separate noise vs muons
+    noise = integrals[integrals <= threshold]
+    muons = integrals[integrals > threshold]
 
-print(f"Saved histogram of integrals to Muoncounts_for_{run_number}_energy_{beam_energy}.pdf")
+    muon_contamination = len(muons) / len(integrals)
+
+    # Plot histogram
+    plt.figure(figsize=(8,5))
+    plt.hist(noise, bins=1000, histtype="stepfilled",
+             color='gray', alpha=0.5, label="Noise")
+    plt.hist(muons, bins=1000, histtype="stepfilled",
+             color='blue', alpha=0.7,
+             label=f"Muons, contamination = {muon_contamination:.2%}")
+
+    plt.xlabel("Integrated ADC (area)")
+    plt.ylabel("Number of events")
+    plt.title(f"Muon counter waveform integrals\nRun {run_number}, {position}, {beam_energy}")
+    plt.yscale('log')
+    plt.legend()
+    plt.tight_layout()
+
+    out_file = f"Muoncounts_for_{run_number}_energy_{beam_energy.replace(' ', '_')}.pdf"
+    plt.savefig(out_file)
+    plt.close()
+
+    print(f"Muon contamination = {muon_contamination:.2%}")
+    print(f"Saved histogram to {out_file}")
+
+    return integrals, muon_contamination
+
+
+# Example usage:
+# file_path = "data_testbeam/testbeam_round2/run1355_250924165834_converted.root"
+file_path = "data_testbeam/testbeam_round2/run1355_250924165834_converted.root"
+analyze_muon_contamination(file_path, muoncounter, run_number="1355", position="#1", beam_energy="80GeV positrons")

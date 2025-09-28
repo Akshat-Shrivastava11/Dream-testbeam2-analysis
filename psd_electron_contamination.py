@@ -36,8 +36,8 @@ def analyze_electron_contamination(
     integrals = integrate_waveforms(events, window=window, baseline_samples=baseline_samples)
 
     # Classify events
-    noise      = integrals[integrals <= 1000]
-    mips       = integrals[(integrals > 1000) & (integrals <= 5000)]
+    noise      = integrals[integrals <= 200]
+    mips       = integrals[(integrals > 200) & (integrals <= 5000)]
     electrons  = integrals[integrals > 5000]
 
     total_events = len(integrals)
@@ -45,16 +45,25 @@ def analyze_electron_contamination(
     mip_fraction   = len(mips) / total_events
     electron_fraction = len(electrons) / total_events
     bins = np.linspace(0, max(integrals), 200)
-    # Plot histogram
+
     plt.figure(figsize=(8,5))
-    plt.hist(integrals, bins=bins, histtype="step", color='black', label="All events")
-    plt.hist(noise, bins=bins, histtype="stepfilled",
-            color='gray', alpha=0.5, label=f"Noise ({noise_fraction:.2%})")
-    plt.hist(mips, bins=bins, histtype="stepfilled",
-            color='red', alpha=0.7, label=f"MIPs (π, μ) ({mip_fraction:.2%})")
-    plt.hist(electrons, bins=bins, histtype="stepfilled",
-            color='blue', alpha=0.7,
-            label=f"Electrons ({electron_fraction:.2%})")
+
+    # Stacked histogram
+    plt.hist(
+        [noise, mips, electrons],
+        bins=bins,
+        stacked=True,
+        label=[
+            f"Noise ({noise_fraction:.2%})",
+            f"MIPs (π, μ) ({mip_fraction:.2%})",
+            f"Electrons ({electron_fraction:.2%})"
+        ],
+        color=['gray', 'red', 'blue'],
+        alpha=0.7
+    )
+
+    # Overlay all events outline
+    plt.hist(integrals, bins=bins, histtype="step", color='black', linewidth=1.2, label="All events")
 
     plt.yscale("log")
     plt.xlabel("Integrated ADC (area)")
@@ -62,14 +71,16 @@ def analyze_electron_contamination(
     plt.title(f"Electron counter waveform integrals\nRun {run_number}, {position}, {beam_energy}")
     plt.legend()
     plt.tight_layout()
+    
+
 
     # Ensure output directory exists
-    out_dir = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/plots_electroncontamination"
+    out_dir = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/stacked_plots_electroncontamination_noisecut500"
     os.makedirs(out_dir, exist_ok=True)
 
     out_file = os.path.join(
         out_dir,
-        f"non_electroncounts_for_{run_number}_energy_{beam_energy.replace(' ', '_')}.pdf"
+        f"Mip_electronfractions_for_{run_number}_energy_{beam_energy.replace(' ', '_')}.pdf"
     )
     plt.savefig(out_file)
     plt.close()

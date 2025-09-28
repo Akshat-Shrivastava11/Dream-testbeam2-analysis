@@ -135,6 +135,7 @@ pion_files = {
     'run1439_250927023319.root': '30',
     'run1441_250927033539.root': '20',
     'run1442_250927050848.root': '10',
+    'run1452_250927102123.root': '5',
 }
 
 
@@ -182,9 +183,9 @@ energies_pi, cont_pi, results_pi = collect_results(pion_files, "pions")
 energies_mu, cont_mu, results_mu = collect_results(muon_files, "muons")
 # Plot together
 plt.figure(figsize=(8,6))
-plt.plot(energies_pos, cont_pos, marker='o', linestyle='-', color='g', label="Positrons")
-plt.plot(energies_pi, cont_pi, marker='s', linestyle='--', color='r', label="Pions")
-plt.plot(energies_mu, cont_mu, marker='^', linestyle=':', color='b', label="Muons")
+plt.plot(energies_pos, cont_pos, marker='o', linestyle='-', color='g', label="Positron Beam")
+plt.plot(energies_pi, cont_pi, marker='s', linestyle='--', color='r', label="Pion Beam")
+plt.plot(energies_mu, cont_mu, marker='^', linestyle=':', color='b', label="Muon Beam")
 plt.xlabel("Beam Energy [GeV]", fontsize=14)
 plt.ylabel("Muon Contamination ", fontsize=14)
 plt.title("Muon Contamination vs Beam Energy", fontsize=16)

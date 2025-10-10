@@ -10,7 +10,7 @@ chrnkov2 = "DRS_Board7_Group2_Channel6"
 chrnkov3 = "DRS_Board7_Group2_Channel7"
 
 basedir = "/lustre/research/hep/jdamgov/HG-DREAM/CERN/ROOT/"
-outdir  = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/plots_cherenkov/"
+outdir  = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter"
 
 os.makedirs(outdir, exist_ok=True)
 
@@ -34,7 +34,7 @@ def integrate_waveforms(events, window=100, baseline_samples=20):
 
 def plot_integrals(run_number, beam_energy, beam_type, ints1, ints2, ints3):
     """Make and save histograms for Cherenkov integrals (linear + log y)."""
-    for scale in ["linear", "log"]:
+    for scale in ["linear"]:
         plt.figure(figsize=(8,5))
         plt.hist(ints1, bins=200, histtype="step", label="Cherenkov 1")
         plt.hist(ints2, bins=200, histtype="step", label="Cherenkov 2")
@@ -44,7 +44,7 @@ def plot_integrals(run_number, beam_energy, beam_type, ints1, ints2, ints3):
         plt.title(f"Cherenkov Integrals\nRun {run_number}, {beam_energy} GeV {beam_type}")
         plt.legend()
         plt.yscale(scale)
-        plt.xlim(left=0)  # ensure x-axis starts at 0
+        plt.xlim(0,40000)  # ensure x-axis starts at 0
         plt.tight_layout()
 
         out_file = os.path.join(

@@ -13,11 +13,11 @@ chrnkov2    = "DRS_Board7_Group2_Channel6"
 chrnkov3    = "DRS_Board7_Group2_Channel7"
 
 muon_threshold = 5000
-psd_threshold  = 4000
+psd_threshold  = 2000
 window         = 50
 baseline_samples = 20
 
-output_folder = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter/Cherenkov_mu_e_plots"
+output_folder = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter/Cherenkov_mu_e_post_tightpsd"
 os.makedirs(output_folder, exist_ok=True)
 
 # ===================================
@@ -95,6 +95,7 @@ for particle_type, files_dict in all_files.items():
         try:
             with uproot.open(file_path) as f:
                 tree = f["EventTree"]
+
                 psd_int   = integrate_waveforms(tree[psd].array(library="np"), window, baseline_samples)
                 muon_int  = integrate_waveforms(tree[muoncounter].array(library="np"), window, baseline_samples)
                 cher1_int = integrate_waveforms(tree[chrnkov1].array(library="np"), window, baseline_samples)
@@ -103,7 +104,8 @@ for particle_type, files_dict in all_files.items():
 
             # Masks
             muon_mask     = muon_int > muon_threshold
-            positron_mask = (muon_int < muon_threshold) & (psd_int > psd_threshold)
+            positron_mask = (muon_int < muon_threshold) & (psd_int > 40000)
+            pion_mask = (muon_int < muon_threshold) & (psd_int < 2000 )
 
             cher_data = [cher1_int, cher2_int, cher3_int]
             cher_labels = ["Cherenkov 1", "Cherenkov 2", "Cherenkov 3"]
@@ -114,12 +116,29 @@ for particle_type, files_dict in all_files.items():
             for ax, ch, label in zip(axes, cher_data, cher_labels):
                 bins = np.linspace(0, np.max(ch), 100)
                 ax.hist(ch[muon_mask], bins=bins, alpha=0.6, label="Muons", histtype='step', color='blue')
-                ax.hist(ch[positron_mask], bins=bins, alpha=0.6, label="Positrons", histtype='step', color='green')
-                ax.hist(ch, bins=bins, histtype='step', color='black', linewidth=1.1, label="All events")
+                ax.hist(ch[positron_mask], bins=bins, alpha=0.6, label=f"Positrons (muon_int < muon_threshold) & (psd_int > 40000) ", histtype='step', color='green')
+                ax.hist(ch[pion_mask], bins=bins, histtype='step', color='red', linewidth=1.1, label=f"All events (muon_int < muon_threshold) & (psd_int < 2000 )  ) ")
+                #ax.hist(ch, bins=bins, histtype='step', color='black', linewidth=1.1, label="All events")
                 ax.set_yscale("log")
                 ax.set_xlabel("ADC")
                 ax.set_title(label)
                 ax.set_xlim(0, 30000)
+                # Fine x-tick marks but sparse labels
+                ax.set_xlim(0, 30000)
+
+                # Major ticks every 5000 (labeled)
+                ax.set_xticks(np.arange(0, 30001, 5000))
+
+                # Minor ticks every 1000 (unlabeled small ticks)
+                ax.set_xticks(np.arange(0, 30001, 1000), minor=True)
+
+                # Make both visible and clean
+                ax.tick_params(axis='x', which='major', labelsize=11, length=7, width=1.3)
+                ax.tick_params(axis='x', which='minor', length=3, width=0.8)
+
+                # Optional gridlines to line up with ticks
+                ax.grid(True, which='both', axis='x', linestyle='--', alpha=0.3)
+
 
                 if ax == axes[0]:
                     ax.set_ylabel("Counts (log scale)")

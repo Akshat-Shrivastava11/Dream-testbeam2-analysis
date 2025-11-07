@@ -1,4 +1,4 @@
-# cherenkov_integrals.py
+# cherenkov_integrals_with_waveforms.py
 import uproot
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,7 +10,7 @@ chrnkov2 = "DRS_Board7_Group2_Channel6"
 chrnkov3 = "DRS_Board7_Group2_Channel7"
 
 basedir = "/lustre/research/hep/jdamgov/HG-DREAM/CERN/ROOT/"
-outdir  = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter"
+outdir  = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter/Waveforms"
 
 os.makedirs(outdir, exist_ok=True)
 
@@ -33,26 +33,47 @@ def integrate_waveforms(events, window=100, baseline_samples=20):
 
 
 def plot_integrals(run_number, beam_energy, beam_type, ints1, ints2, ints3):
-    """Make and save histograms for Cherenkov integrals (linear + log y)."""
-    for scale in ["linear"]:
-        plt.figure(figsize=(8,5))
-        plt.hist(ints1, bins=200, histtype="step", label="Cherenkov 1")
-        plt.hist(ints2, bins=200, histtype="step", label="Cherenkov 2")
-        plt.hist(ints3, bins=200, histtype="step", label="Cherenkov 3")
-        plt.xlabel("Integrated ADC (area)")
-        plt.ylabel("Number of events")
-        plt.title(f"Cherenkov Integrals\nRun {run_number}, {beam_energy} GeV {beam_type}")
-        plt.legend()
-        plt.yscale(scale)
-        plt.xlim(0,40000)  # ensure x-axis starts at 0
-        plt.tight_layout()
+    """Make and save histograms for Cherenkov integrals (linear scale)."""
+    plt.figure(figsize=(8,5))
+    plt.hist(ints1, bins=200, histtype="step", label="Cherenkov 1")
+    plt.hist(ints2, bins=200, histtype="step", label="Cherenkov 2")
+    plt.hist(ints3, bins=200, histtype="step", label="Cherenkov 3")
+    plt.xlabel("Integrated ADC (area)")
+    plt.ylabel("Number of events")
+    plt.title(f"Cherenkov Integrals\nRun {run_number}, {beam_energy} GeV {beam_type}")
+    plt.legend()
+    plt.yscale("linear")
+    plt.xlim(0,40000)
+    plt.tight_layout()
 
-        out_file = os.path.join(
-            outdir, f"Cherenkov_run{run_number}_{beam_energy}GeV_{beam_type}_{scale}.pdf"
-        )
-        plt.savefig(out_file)
-        plt.close()
-        print(f"Saved {scale} histogram → {out_file}")
+    out_file = os.path.join(
+        outdir, f"Cherenkov_run{run_number}_{beam_energy}GeV_{beam_type}_linear.pdf"
+    )
+    plt.savefig(out_file)
+    plt.close()
+    print(f"Saved histogram → {out_file}")
+
+
+def plot_waveforms(run_number, beam_energy, beam_type, data1, data2, data3, n_show=1000):
+    """Overlay a few example waveforms for each Cherenkov counter."""
+    plt.figure(figsize=(10,8))
+
+    for i, data in enumerate([data1, data2, data3], start=1):
+        plt.subplot(3, 1, i)
+        num_to_plot = min(n_show, len(data))
+        for w in data[:num_to_plot]:
+            plt.plot(np.arange(len(w)), w, alpha=0.3, lw=0.8)
+        plt.title(f"Cherenkov {i} Waveforms ({beam_energy} GeV {beam_type})")
+        plt.xlabel("Sample index")
+        plt.ylabel("ADC counts")
+
+    plt.tight_layout()
+    out_file = os.path.join(
+        outdir, f"Waveforms_run{run_number}_{beam_energy}GeV_{beam_type}.pdf"
+    )
+    plt.savefig(out_file)
+    plt.close()
+    print(f"Saved waveform overlay → {out_file}")
 
 
 def analyze_cherenkov(file_path, run_number, beam_energy, beam_type):
@@ -65,11 +86,16 @@ def analyze_cherenkov(file_path, run_number, beam_energy, beam_type):
 
     print(f"Loaded {len(data1)} events from {file_path}")
 
-    ints1 = integrate_waveforms(data1)
-    ints2 = integrate_waveforms(data2)
-    ints3 = integrate_waveforms(data3)
+    # Plot waveform overlays
+    plot_waveforms(run_number, beam_energy, beam_type, data1, data2, data3)
 
-    plot_integrals(run_number, beam_energy, beam_type, ints1, ints2, ints3)
+    # Compute integrals
+    # ints1 = integrate_waveforms(data1)
+    # ints2 = integrate_waveforms(data2)
+    # ints3 = integrate_waveforms(data3)
+
+    # Plot histograms of integrals
+    #plot_integrals(run_number, beam_energy, beam_type, ints1, ints2, ints3)
 
 
 # --- File dictionaries ---
@@ -104,7 +130,6 @@ muon_files = {
 }
 
 
-# --- Loop over everything ---
 def run_all():
     for fname, energy in positron_files.items():
         run_number = fname.split('_')[0].replace("run", "")

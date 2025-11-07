@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os 
 
+
+
+#KT1
+
 muoncounter = "DRS_Board7_Group2_Channel4"
 def integrate_waveforms(events, window=100, baseline_samples=20):
     """

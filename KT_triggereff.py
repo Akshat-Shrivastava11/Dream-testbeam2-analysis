@@ -29,13 +29,6 @@ def compute_efficiency(integrals, threshold):
         return 0.0
     return np.sum(integrals > threshold) / len(integrals)
 
-# --- Trigger analysis ---
-def analyze_trigger_efficiency(file_path, trigger_branch, window=100, baseline_samples=20):
-    with uproot.open(file_path) as f:
-        tree = f["EventTree"]
-        events = tree[trigger_branch].array(library="np")
-    return integrate_waveforms(events, window=window, baseline_samples=baseline_samples)
-
 # --- File definitions ---
 basedir = '/lustre/research/hep/jdamgov/HG-DREAM/CERN/ROOT/' 
 
@@ -74,7 +67,8 @@ all_files = {
 
 # --- Analysis ---
 threshold = 1000
-results = {ptype: {"energy": [], "KT1_eff": [], "KT2_eff": []} for ptype in all_files}
+results = {ptype: {"energy": [], "KT1_eff": [], "KT2_eff": [], 
+                   "Product_eff": [], "Coinc_eff": []} for ptype in all_files}
 
 for particle_type, files_dict in all_files.items():
     for fname, energy in files_dict.items():
@@ -83,22 +77,34 @@ for particle_type, files_dict in all_files.items():
 
         print(f"Processing {particle_type} run {run_number}, {energy} GeV...")
         try:
-            # KT1
-            integrals_KT1 = analyze_trigger_efficiency(file_path, KT1trigger)
-            eff_KT1 = compute_efficiency(integrals_KT1, threshold)
+            # --- Load both triggers for event-level coincidence ---
+            with uproot.open(file_path) as f:
+                tree = f["EventTree"]
+                events_KT1 = tree[KT1trigger].array(library="np")
+                events_KT2 = tree[KT2trigger].array(library="np")
 
-            # KT2
-            integrals_KT2 = analyze_trigger_efficiency(file_path, KT2trigger)
+            integrals_KT1 = integrate_waveforms(events_KT1)
+            integrals_KT2 = integrate_waveforms(events_KT2)
+
+            eff_KT1 = compute_efficiency(integrals_KT1, threshold)
             eff_KT2 = compute_efficiency(integrals_KT2, threshold)
+
+            # --- New metrics ---
+            product_eff = eff_KT1 * eff_KT2
+            both_fired = np.sum((integrals_KT1 > threshold) & (integrals_KT2 > threshold))
+            coinc_eff = both_fired / len(integrals_KT1)
 
             # Save results
             results[particle_type]["energy"].append(float(energy))
             results[particle_type]["KT1_eff"].append(eff_KT1)
             results[particle_type]["KT2_eff"].append(eff_KT2)
+            results[particle_type]["Product_eff"].append(product_eff)
+            results[particle_type]["Coinc_eff"].append(coinc_eff)
 
-            print(f"   ↳ KT1 eff={eff_KT1:.2%}, KT2 eff={eff_KT2:.2%} ({len(integrals_KT1)} events)")
+            print(f"   ↳ KT1 eff={eff_KT1:.2%}, KT2 eff={eff_KT2:.2%}, "
+                  f"Product={product_eff:.2%}, Coincidence={coinc_eff:.2%}")
 
-            # --- Plot integrals distribution comparison ---
+            # --- Plot integrals distributions ---
             plt.figure(figsize=(7,5))
             plt.hist(integrals_KT1, bins=100, histtype="step", label=f"KT1 eff={eff_KT1:.2%}", color="blue")
             plt.hist(integrals_KT2, bins=100, histtype="step", label=f"KT2 eff={eff_KT2:.2%}", color="green")
@@ -115,19 +121,20 @@ for particle_type, files_dict in all_files.items():
             out_file = os.path.join(out_dir, f"{particle_type}_run{run_number}_{energy}_KT1vsKT2_integrals.pdf")
             plt.savefig(out_file)
             plt.close()
-            print(f"   ↳ Saved KT1 vs KT2 integral histogram: {out_file}")
 
         except Exception as e:
             print(f"⚠️ Failed on run {run_number}: {e}")
 
 # --- Plot Efficiency vs. Energy ---
+out_dir = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/KT_trigger_plots/total_efficiency/"
+os.makedirs(out_dir, exist_ok=True)
+
 plt.figure(figsize=(8,6))
 for ptype, marker, color in zip(results.keys(), ["o", "s", "^"], ["red", "blue", "green"]):
     energies = np.array(results[ptype]["energy"])
     effs_KT1 = np.array(results[ptype]["KT1_eff"])
     effs_KT2 = np.array(results[ptype]["KT2_eff"])
     order = np.argsort(energies)
-
     plt.plot(energies[order], effs_KT1[order], marker=marker, linestyle="-", color=color, label=f"{ptype.capitalize()} KT1")
     plt.plot(energies[order], effs_KT2[order], marker=marker, linestyle="--", color=color, label=f"{ptype.capitalize()} KT2")
 
@@ -137,10 +144,42 @@ plt.title("KT1 vs KT2 Trigger Efficiency vs Beam Energy")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
-
-out_dir = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/KT_trigger_plots"
-os.makedirs(out_dir, exist_ok=True)
-out_file = os.path.join(out_dir, f"KT1vsKT2_eff_vs_energy_thr{threshold}.pdf")
-plt.savefig(out_file)
+plt.savefig(os.path.join(out_dir, f"KT1vsKT2_eff_vs_energy_thr{threshold}.pdf"))
 plt.close()
-print(f"✅ Saved KT1 vs KT2 efficiency vs energy plot to {out_file}")
+print(f"✅ Saved KT1 vs KT2 efficiency vs energy plot")
+
+# --- Plot Product Efficiency vs Energy ---
+plt.figure(figsize=(8,6))
+for ptype, marker, color in zip(results.keys(), ["o", "s", "^"], ["red", "blue", "green"]):
+    energies = np.array(results[ptype]["energy"])
+    prod_eff = np.array(results[ptype]["Product_eff"])
+    order = np.argsort(energies)
+    plt.plot(energies[order], prod_eff[order], marker=marker, linestyle="-", color=color, label=f"{ptype.capitalize()} KT1*KT2")
+
+plt.xlabel("Beam Energy [GeV]")
+plt.ylabel(f"Product Efficiency (thr = {threshold})")
+plt.title("Product Efficiency (KT1 × KT2) vs Beam Energy")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig(os.path.join(out_dir, f"KT1xKT2_product_eff_vs_energy_thr{threshold}.pdf"))
+plt.close()
+print(f"✅ Saved KT1×KT2 product efficiency vs energy plot")
+
+# --- Plot Coincidence Efficiency vs Energy ---
+plt.figure(figsize=(8,6))
+for ptype, marker, color in zip(results.keys(), ["o", "s", "^"], ["red", "blue", "green"]):
+    energies = np.array(results[ptype]["energy"])
+    coinc_eff = np.array(results[ptype]["Coinc_eff"])
+    order = np.argsort(energies)
+    plt.plot(energies[order], coinc_eff[order], marker=marker, linestyle="-", color=color, label=f"{ptype.capitalize()} Coincidence")
+
+plt.xlabel("Beam Energy [GeV]")
+plt.ylabel(f"Coincidence Efficiency (thr = {threshold})")
+plt.title("KT1 & KT2 Coincidence Efficiency vs Beam Energy")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig(os.path.join(out_dir, f"KT1KT2_coinc_eff_vs_energy_thr{threshold}.pdf"))
+plt.close()
+print(f"✅ Saved KT1&KT2 coincidence efficiency vs energy plot")

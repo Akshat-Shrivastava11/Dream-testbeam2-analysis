@@ -1,8 +1,4 @@
-#beamcontamination
-import uproot
-import matplotlib.pyplot as plt
-import numpy as np
-
+# beamcontamination
 import uproot
 import matplotlib.pyplot as plt
 import numpy as np
@@ -48,36 +44,43 @@ def stacked_muon_counter(file_path, muoncounter, psd, run_number, position, beam
     psd_integrals   = integrate_waveforms(psd_events, window=50, baseline_samples=baseline_samples)
 
     print("Applying PSD selection masks...")
-    noise_mask      = psd_integrals <= 200
-    mip_mask        = (psd_integrals > 200) & (psd_integrals <= 5000)
-    electron_mask   = psd_integrals > 5000
+    noise_mask    = psd_integrals <= 200
+    mip_mask      = (psd_integrals > 200) & (psd_integrals <= 5000)
+    electron_mask = psd_integrals > 5000
 
-    print(f"Events classified by PSD: Noise={np.sum(noise_mask)}, MIPs={np.sum(mip_mask)}, Electrons={np.sum(electron_mask)}")
+    print(f"Events classified by PSD: Noise={np.sum(noise_mask)}, "
+          f"MIPs={np.sum(mip_mask)}, Electrons={np.sum(electron_mask)}")
 
-    # Muon counter selection
-    muon_mask = muon_integrals > muon_threshold
-    print(f"Events above muon threshold ({muon_threshold} ADC): {np.sum(muon_mask)}")
+    # Split MIPs into pions (below threshold) and muons (above threshold)
+    pion_mask = mip_mask & (muon_integrals <= muon_threshold)
+    muon_mask = mip_mask & (muon_integrals >  muon_threshold)
 
-    # Separate muon counter integrals by PSD category
+    # Separate categories
     muon_noise = muon_integrals[noise_mask]
-    muon_mip   = muon_integrals[mip_mask]
+    muon_pions = muon_integrals[pion_mask]
+    muon_muons = muon_integrals[muon_mask]
     muon_elec  = muon_integrals[electron_mask]
 
     # Fractions for legend
     total_events = len(muon_integrals)
     noise_frac = len(muon_noise) / total_events
-    mip_frac   = len(muon_mip) / total_events
+    pion_frac  = len(muon_pions) / total_events
+    muon_frac  = len(muon_muons) / total_events
     elec_frac  = len(muon_elec) / total_events
-    print(f"Fractions: Noise={noise_frac:.2%}, MIPs={mip_frac:.2%}, Electrons={elec_frac:.2%}")
+    print(f"Fractions: Noise={noise_frac:.2%}, Pions={pion_frac:.2%}, "
+          f"Muons={muon_frac:.2%}, Electrons={elec_frac:.2%}")
+
+    bins = np.linspace(0, max(muon_integrals), 200)
 
     # --- Log-scale histogram ---
     print("Generating stacked histogram (log scale)...")
-    bins = np.linspace(0, max(muon_integrals), 200)
     plt.figure(figsize=(8,5))
-    plt.hist([muon_noise, muon_mip, muon_elec], bins=bins, stacked=True,
-            color=['gray', 'red', 'blue'], alpha=0.7,
-            label=[f"Noise ({noise_frac:.2%})",
-                    f"MIPs (π, μ) ({mip_frac:.2%})",
+    plt.hist([muon_noise, muon_pions, muon_muons, muon_elec],
+             bins=bins, stacked=True,
+             color=['gray', 'red', 'purple', 'blue'], alpha=0.7,
+             label=[f"Noise ({noise_frac:.2%})",
+                    f"Pions ({pion_frac:.2%})",
+                    f"Muons ({muon_frac:.2%})",
                     f"Electrons ({elec_frac:.2%})"])
     plt.hist(muon_integrals, bins=bins, histtype="step", color='black', linewidth=1.2, label="All events")
     plt.yscale("log")
@@ -87,7 +90,7 @@ def stacked_muon_counter(file_path, muoncounter, psd, run_number, position, beam
     plt.legend()
     plt.tight_layout()
 
-    out_dir_log = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/stacked_plots_muon"
+    out_dir_log = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Particle_fractions"
     os.makedirs(out_dir_log, exist_ok=True)
     out_file_log = os.path.join(out_dir_log, f"Muon_counter_PSDstack_Run{run_number}_{beam_energy.replace(' ', '_')}.pdf")
     plt.savefig(out_file_log)
@@ -97,29 +100,31 @@ def stacked_muon_counter(file_path, muoncounter, psd, run_number, position, beam
     # --- Linear-scale histogram ---
     print("Generating stacked histogram (linear scale)...")
     plt.figure(figsize=(8,5))
-    plt.hist([muon_noise, muon_mip, muon_elec], bins=bins, stacked=True,
-            color=['gray', 'red', 'blue'], alpha=0.7,
-            label=[f"Noise ({noise_frac:.2%})",
-                    f"MIPs (π, μ) ({mip_frac:.2%})",
+    plt.hist([muon_noise, muon_pions, muon_muons, muon_elec],
+             bins=bins, stacked=True,
+             color=['gray', 'red', 'purple', 'blue'], alpha=0.7,
+             label=[f"Noise ({noise_frac:.2%})",
+                    f"Pions ({pion_frac:.2%})",
+                    f"Muons ({muon_frac:.2%})",
                     f"Electrons ({elec_frac:.2%})"])
     plt.hist(muon_integrals, bins=bins, histtype="step", color='black', linewidth=1.2, label="All events")
-    #plt.yscale("log")  # linear scale
     plt.xlabel("Muon counter integrated ADC (area)")
     plt.ylabel("Number of events")
     plt.title(f"Muon counter waveform integrals with PSD selection\nRun {run_number}, {position}, {beam_energy}")
     plt.legend()
     plt.tight_layout()
 
-    out_dir_lin = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/LogOff_stacked_plots_muon"
+    out_dir_lin = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Particle_fractions_LogOff_stacked_plots"
     os.makedirs(out_dir_lin, exist_ok=True)
     out_file_lin = os.path.join(out_dir_lin, f"Muon_counter_PSDstack_Run{run_number}_{beam_energy.replace(' ', '_')}.pdf")
     plt.savefig(out_file_lin)
     plt.close()
     print(f"Saved linear-scale histogram to {out_file_lin}")
 
+    return muon_integrals, noise_frac, pion_frac, muon_frac, elec_frac
+
 
 # --- File paths and energies ---
-
 basedir = '/lustre/research/hep/jdamgov/HG-DREAM/CERN/ROOT/'
 
 positron_files = {
@@ -169,7 +174,7 @@ for particle_type, files_dict in all_files.items():
 
         print(f"\n[{i}/{len(files_dict)}] Processing {particle_type} run {run_number}, energy {energy}GeV ...")
         try:
-            muon_integrals, noise_frac, mip_frac, elec_frac = stacked_muon_counter(
+            muon_integrals, noise_frac, pion_frac, muon_frac, elec_frac = stacked_muon_counter(
                 file_path=file_path,
                 muoncounter="DRS_Board7_Group2_Channel4",
                 psd="DRS_Board7_Group1_Channel1",
@@ -180,7 +185,7 @@ for particle_type, files_dict in all_files.items():
                 baseline_samples=20,
                 muon_threshold=5000
             )
-            print(f"Run {run_number} done: Noise={noise_frac:.2%}, MIPs={mip_frac:.2%}, Electrons={elec_frac:.2%}")
+            print(f"Run {run_number} done: Noise={noise_frac:.2%}, "
+                  f"Pions={pion_frac:.2%}, Muons={muon_frac:.2%}, Electrons={elec_frac:.2%}")
         except Exception as e:
             print(f"Failed to process run {run_number}: {e}")
-

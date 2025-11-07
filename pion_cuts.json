@@ -1,0 +1,58 @@
+{
+    "5": {
+      "Cherenkov1": 1500,
+      "Cherenkov2": 2000,
+      "Cherenkov3": 1800
+    },
+    "10": {
+      "Cherenkov1": 5000,
+      "Cherenkov2": 10000,
+      "Cherenkov3": 10000
+    },
+    "20": {
+      "Cherenkov1": 4000,
+      "Cherenkov2": 10000,
+      "Cherenkov3": 10000
+    },
+    "30": {
+      "Cherenkov1": 2000,
+      "Cherenkov2": 2500,
+      "Cherenkov3": 2300
+    },
+    "40": {
+      "Cherenkov1": 2500,
+      "Cherenkov2": 3000,
+      "Cherenkov3": 2800
+    },
+    "60": {
+      "Cherenkov1": 2700,
+      "Cherenkov2": 3400,
+      "Cherenkov3": 3100
+    },
+    "80": {
+      "Cherenkov1": 3000,
+      "Cherenkov2": 3700,
+      "Cherenkov3": 3400
+    },
+    "100": {
+      "Cherenkov1": 3300,
+      "Cherenkov2": 4000,
+      "Cherenkov3": 3700
+    },
+    "120": {
+      "Cherenkov1": 3500,
+      "Cherenkov2": 4300,
+      "Cherenkov3": 3900
+    },
+    "160": {
+      "Cherenkov1": 4000,
+      "Cherenkov2": 4800,
+      "Cherenkov3": 4400
+    },
+    "170": {
+      "Cherenkov1": 4200,
+      "Cherenkov2": 5000,
+      "Cherenkov3": 4600
+    }
+  }
+  

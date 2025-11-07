@@ -4,7 +4,7 @@ import uproot
 import matplotlib.pyplot as plt
 
 # ===================================
-# Channels and thresholds
+# Channels
 # ===================================
 psd         = "DRS_Board7_Group1_Channel1"
 muoncounter = "DRS_Board7_Group2_Channel4"
@@ -12,12 +12,12 @@ chrnkov1    = "DRS_Board7_Group2_Channel5"
 chrnkov2    = "DRS_Board7_Group2_Channel6"
 chrnkov3    = "DRS_Board7_Group2_Channel7"
 
-muon_threshold = 5000
-psd_threshold  = 2000
-window         = 50
-baseline_samples = 20
+window            = 50
+baseline_samples  = 20
+cherenkov_cut     = 1000  # Threshold for "fired"
+muon_threshold    = 5000  # Muon veto threshold
 
-output_folder = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter/Cherenkov_mu_e_post_tightpsd"
+output_folder = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/PSD/cherenkov_overlays/"
 os.makedirs(output_folder, exist_ok=True)
 
 # ===================================
@@ -46,35 +46,17 @@ pion_files = {
     'run1432_250926203416.root': '100',
     'run1434_250926222520.root': '160',
     'run1429_250926183919.root': '80',
-    'run1437_250927003120.root': '60',
-    'run1438_250927012632.root': '40',
-    'run1439_250927023319.root': '30',
-    'run1441_250927033539.root': '20',
-    'run1442_250927050848.root': '10',
-    'run1452_250927102123.root': '5',
 }
 positron_files = {
     'run1410_250925145231.root': '100',
     'run1411_250925154340.root': '120',
     'run1422_250926102502.root': '110',
-    'run1409_250925135843.root': '80',
-    'run1416_250925230347.root': '30',
-    'run1423_250926105310.root': '20',
-    'run1424_250926124313.root': '10',
-    'run1527_250929001555.root': '100',
-    'run1526_250928235028.root': '60',
-    'run1525_250928232144.root': '40',
 }
-
-
-
 muon_files = {
     'run1447_250927084726.root': '170',
-    'run1445_250927074156.root': '110',
 }
 
 all_files = {
-    
     "pion": pion_files,
     "positron": positron_files,
     "muon": muon_files,
@@ -96,61 +78,51 @@ for particle_type, files_dict in all_files.items():
             with uproot.open(file_path) as f:
                 tree = f["EventTree"]
 
+                # Integrate waveforms
                 psd_int   = integrate_waveforms(tree[psd].array(library="np"), window, baseline_samples)
                 muon_int  = integrate_waveforms(tree[muoncounter].array(library="np"), window, baseline_samples)
                 cher1_int = integrate_waveforms(tree[chrnkov1].array(library="np"), window, baseline_samples)
                 cher2_int = integrate_waveforms(tree[chrnkov2].array(library="np"), window, baseline_samples)
                 cher3_int = integrate_waveforms(tree[chrnkov3].array(library="np"), window, baseline_samples)
 
-            # Masks
-            muon_mask     = muon_int > muon_threshold
-            positron_mask = (muon_int < muon_threshold) & (psd_int > 40000)
-            pion_mask = (muon_int < muon_threshold) & (psd_int < 2000 )
+            # Apply muon veto
+            veto_mask = muon_int < muon_threshold
+            psd_int   = psd_int[veto_mask]
+            cher1_int = cher1_int[veto_mask]
+            cher2_int = cher2_int[veto_mask]
+            cher3_int = cher3_int[veto_mask]
 
-            cher_data = [cher1_int, cher2_int, cher3_int]
-            cher_labels = ["Cherenkov 1", "Cherenkov 2", "Cherenkov 3"]
+            bins = np.linspace(0, 30000, 50)  # Fixed x-axis 0-30000
 
-            # Figure with 3 side-by-side subplots
-            fig, axes = plt.subplots(1, 3, figsize=(15,5), sharey=True)
+            fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharey=True)
+            fig.suptitle(f"PSD Distribution vs Cherenkov Firing with Muon Veto\nRun {run_number}, {beam_energy}")
 
-            for ax, ch, label in zip(axes, cher_data, cher_labels):
-                bins = np.linspace(0, np.max(ch), 100)
-                ax.hist(ch[muon_mask], bins=bins, alpha=0.6, label="Muons", histtype='step', color='blue')
-                ax.hist(ch[positron_mask], bins=bins, alpha=0.6, label=f"Positrons (muon_int < muon_threshold) & (psd_int > 40000) ", histtype='step', color='green')
-                ax.hist(ch[pion_mask], bins=bins, histtype='step', color='red', linewidth=1.1, label=f"All events (muon_int < muon_threshold) & (psd_int < 2000 )  ) ")
-                #ax.hist(ch, bins=bins, histtype='step', color='black', linewidth=1.1, label="All events")
-                ax.set_yscale("log")
-                ax.set_xlabel("ADC")
+            cher_data = [
+                ("Cherenkov 1", cher1_int),
+                ("Cherenkov 2", cher2_int),
+                ("Cherenkov 3", cher3_int),
+            ]
+
+            for ax, (label, cher) in zip(axes, cher_data):
+                fired = cher > cherenkov_cut
+                not_fired = ~fired
+
+                ax.hist(psd_int[not_fired], bins=bins, color='gray', alpha=0.6, label='Not Fired')
+                ax.hist(psd_int[fired], bins=bins, color='orange', alpha=0.7, label='Fired')
+                ax.set_xlabel("PSD Integral (ADC·ns)")
+                ax.set_xlim(0, 30000)
+                #ax.set_yscale("log")
+                ax.grid(True, linestyle='--', alpha=0.3)
+                ax.legend()
                 ax.set_title(label)
-                ax.set_xlim(0, 30000)
-                # Fine x-tick marks but sparse labels
-                ax.set_xlim(0, 30000)
 
-                # Major ticks every 5000 (labeled)
-                ax.set_xticks(np.arange(0, 30001, 5000))
+            axes[0].set_ylabel("Counts ")
+            plt.tight_layout(rect=[0, 0, 1, 0.95])
 
-                # Minor ticks every 1000 (unlabeled small ticks)
-                ax.set_xticks(np.arange(0, 30001, 1000), minor=True)
-
-                # Make both visible and clean
-                ax.tick_params(axis='x', which='major', labelsize=11, length=7, width=1.3)
-                ax.tick_params(axis='x', which='minor', length=3, width=0.8)
-
-                # Optional gridlines to line up with ticks
-                ax.grid(True, which='both', axis='x', linestyle='--', alpha=0.3)
-
-
-                if ax == axes[0]:
-                    ax.set_ylabel("Counts (log scale)")
-                ax.legend(fontsize=8)
-
-            plt.suptitle(f"Cherenkov Counters — Run {run_number}, {beam_energy}", fontsize=14)
-            plt.tight_layout(rect=[0,0,1,0.95])
-
-            output_file = os.path.join(output_folder, f"{particle_type}_Run{run_number}_energy_{beam_energy}.pdf")
+            output_file = os.path.join(output_folder, f"PSD_vsCherenkov_Run{run_number}_{beam_energy}.pdf")
             plt.savefig(output_file)
             plt.close()
-            print(f"Saved PDF → {output_file}")
+            print(f"✅ Saved 3-panel PSD vs Cherenkov plot → {output_file}")
 
         except Exception as e:
-            print(f"Failed to process {fname}: {e}")
+            print(f"❌ Failed to process {fname}: {e}")

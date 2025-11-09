@@ -214,36 +214,76 @@ def load_run(file_path):
         c3_arr = tree[ch3].array(library="np")
     return psd_arr, muon_arr, c1_arr, c2_arr, c3_arr
 
-def build_dataset(file_dict, tag):
-    all_wfs = []
-    all_ints = []
-    all_energies = []
-    samples_per_file = []
+def build_datasets_from_mixed_files(file_dict):
+    """
+    Builds two datasets (positron-like, pion-like) from same file_dict using physics cuts:
+      - muon_integral < muon_threshold (veto)
+      - positron-like: PSD integral > 5000
+      - pion-like: PSD integral < 5000
+    Returns dicts for each.
+    """
+    pos_wfs_all, pion_wfs_all = [], []
+    pos_ints_all, pion_ints_all = [], []
+    pos_E_all, pion_E_all = [], []
+
     for fname, energy in file_dict.items():
         fpath = os.path.join(basedir, fname)
         print("Loading:", fpath)
         try:
             psd_arr, muon_arr, c1_arr, c2_arr, c3_arr = load_run(fpath)
             wfs, ints, idxs = preprocess_run_waveforms(psd_arr, muon_arr, c1_arr, c2_arr, c3_arr)
-            print(f"  -> kept {wfs.shape[0]} / {len(psd_arr)} events")
             if wfs.shape[0] == 0:
                 continue
-            all_wfs.append(wfs)
-            all_ints.append(ints)
-            all_energies.append(np.full(wfs.shape[0], float(energy), dtype=np.float32))
-            samples_per_file.append(wfs.shape[0])
+
+            # extract integrals for cuts
+            psd_int = ints[:, 0]
+            muon_int = ints[:, 1]
+
+            # event selections
+            positron_mask = (muon_int < muon_threshold) & (psd_int > 5000)
+            pion_mask     = (muon_int < muon_threshold) & (psd_int < 5000)
+
+            # keep separate
+            pos_wfs = wfs[positron_mask]
+            pos_ints = ints[positron_mask]
+            pion_wfs = wfs[pion_mask]
+            pion_ints = ints[pion_mask]
+
+            print(f"  -> positron-like: {len(pos_wfs)}, pion-like: {len(pion_wfs)} / total {len(wfs)}")
+
+            pos_wfs_all.append(pos_wfs)
+            pion_wfs_all.append(pion_wfs)
+            pos_ints_all.append(pos_ints)
+            pion_ints_all.append(pion_ints)
+
+            pos_E_all.append(np.full(len(pos_wfs), float(energy)))
+            pion_E_all.append(np.full(len(pion_wfs), float(energy)))
+
         except Exception as e:
             print("  ERROR loading", fname, e)
-    if len(all_wfs) == 0:
-        return np.zeros((0,5,wf_window), dtype=np.float32), np.zeros((0,5), dtype=np.float32), np.zeros((0,), dtype=np.float32), []
-    all_wfs = np.concatenate(all_wfs, axis=0)
-    all_ints = np.concatenate(all_ints, axis=0)
-    all_energies = np.concatenate(all_energies, axis=0)
-    return all_wfs, all_ints, all_energies, samples_per_file
 
-print("\n=== Building datasets ===")
-pos_wfs, pos_ints, pos_energies, pos_counts = build_dataset(positron_files, "positron")
-pion_wfs, pion_ints, pion_energies, pion_counts = build_dataset(pion_files, "pion")
+    def concat(lst):
+        return np.concatenate(lst, axis=0) if len(lst) else np.zeros((0,5,wf_window), np.float32)
+
+    pos_wfs_all = concat(pos_wfs_all)
+    pion_wfs_all = concat(pion_wfs_all)
+    pos_ints_all = np.concatenate(pos_ints_all, axis=0) if len(pos_ints_all) else np.zeros((0,5))
+    pion_ints_all = np.concatenate(pion_ints_all, axis=0) if len(pion_ints_all) else np.zeros((0,5))
+    pos_E_all = np.concatenate(pos_E_all, axis=0) if len(pos_E_all) else np.zeros((0,))
+    pion_E_all = np.concatenate(pion_E_all, axis=0) if len(pion_E_all) else np.zeros((0,))
+
+    print(f"\nAfter cuts:")
+    print(f"  Positron-like events: {pos_wfs_all.shape[0]}")
+    print(f"  Pion-like events:     {pion_wfs_all.shape[0]}")
+
+    return pos_wfs_all, pion_wfs_all, pos_ints_all, pion_ints_all, pos_E_all, pion_E_all
+
+print("\n=== Building datasets from mixed beam files ===")
+pos_wfs, pion_wfs, pos_ints, pion_ints, pos_energies, pion_energies = build_datasets_from_mixed_files({**positron_files, **pion_files})
+
+# print("\n=== Building datasets ===")
+# pos_wfs, pos_ints, pos_energies, pos_counts = build_dataset(positron_files, "positron")
+# pion_wfs, pion_ints, pion_energies, pion_counts = build_dataset(pion_files, "pion")
 
 print("\nDataset sizes:")
 print(" Positons:", pos_wfs.shape, " integrals:", pos_ints.shape)
@@ -521,7 +561,7 @@ else:
 
 # 4) error vs energy (for both sets)
 # need energies for pos (train+val) and pion energies
-pos_all_energies = np.concatenate([np.repeat(list(positron_files.values())[i], pos_counts[i]) if i < len(pos_counts) else np.array([]) for i in range(len(pos_counts))])
+#pos_all_energies = np.concatenate([np.repeat(list(positron_files.values())[i], pos_counts[i]) if i < len(pos_counts) else np.array([]) for i in range(len(pos_counts))])
 # simpler: we stored pos_energies per-file earlier? we didn't — use pos_energies if available in build_dataset return (we didn't keep). Instead compute per-file mapping:
 # We kept pos_counts from build_dataset, but not per-event energies array. Simpler: build per-file energies earlier - but to keep flow, we will just scatter with jittered index.
 plt.figure(figsize=(7,4))

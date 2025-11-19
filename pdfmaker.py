@@ -8,8 +8,9 @@ dirs = [
     # "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter/Cherenkov_vs_PSD_plots_2D_linear",
     # "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/PSD/stacked_plots_electroncontamination_muon_and_CherenkovCuts",
     #'/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter/Cherenkov_mu_e_plots'
-    '/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter/Cherenkov_mu_e_post_tightpsd',
-    '/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter/Cherenkov_energywise_overlay'
+    # '/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter/Cherenkov_mu_e_post_tightpsd',
+    # '/lustre/research/hep/akshriva/Dream-testbeam2-analysis/Cherenkov_Counter/Cherenkov_energywise_overlay'
+    '/lustre/research/hep/akshriva/Dream-testbeam2-analysis/PSD/Integrals_shape_postmuonveto_overlay/'
     
 ]
 

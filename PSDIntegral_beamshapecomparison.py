@@ -2,7 +2,7 @@ import os
 import numpy as np
 import uproot
 import matplotlib.pyplot as plt
-
+from matplotlib.ticker import AutoMinorLocator
 # ===================================
 # Channels
 # ===================================
@@ -120,6 +120,11 @@ for energy, data in energy_dict.items():
         plt.hist(psd_all, bins=bins, histtype='step', linewidth=2, label=f"{particle_type} (N={len(psd_all)})")
 
     plt.legend()
+    ax = plt.gca()
+    ax.xaxis.set_minor_locator(AutoMinorLocator(5))  # 5 minor ticks per major tick
+    ax.yaxis.set_minor_locator(AutoMinorLocator(5))
+    ax.tick_params(axis='x', which='minor', length=3)
+    ax.tick_params(axis='y', which='minor', length=3)
     plt.tight_layout()
     outpath = os.path.join(output_folder, f"PSD_overlay_{energy}GeV.pdf")
     plt.savefig(outpath)

@@ -6,7 +6,7 @@ import os
 # ============================================================
 # Output directory
 # ============================================================
-outdir = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/beam_fraction_plots"
+outdir = "/lustre/research/hep/akshriva/Dream-testbeam2-analysis/beam_fraction_plots/CLeaned"
 os.makedirs(outdir, exist_ok=True)
 
 # ============================================================
@@ -59,7 +59,7 @@ ck3_branch   = "DRS_Board7_Group2_Channel7"
 window           = 100
 baseline_samples = 20
 muon_threshold   = 5000
-cherenkov_cut    = 1000
+cherenkov_cut    = 5000
 
 # ============================================================
 # Waveform integration (batched)
@@ -72,10 +72,8 @@ def integrate_waveform(events, window=100, baseline_samples=20):
         baseline = np.mean(wf[:baseline_samples])
         corr = wf - baseline
         peak = np.argmin(corr)
-
         start = max(0, peak - window)
         end   = min(len(corr), peak + window)
-
         area = np.trapezoid(corr[start:end], dx=1)
         integrals.append(-area)    # positive area
     return np.array(integrals)
@@ -124,22 +122,55 @@ def classify_events(psd, mu, ck1, ck2, ck3, energy):
         # val is array-like
         return (val > cherenkov_cut) if exp else (val <= cherenkov_cut)
 
+    # def ck_match(pattern):
+    #     m1 = match(pattern[0], ck1)
+    #     m2 = match(pattern[1], ck2)
+    #     m3 = match(pattern[2], ck3)
+    #     # optionally print summary (counts) instead of full arrays
+    #     print(f"    CK match pattern {pattern} → counts ({np.sum(m1)},{np.sum(m2)},{np.sum(m3)})")
+    #     return m1 & m2 & m3
+
     def ck_match(pattern):
-        m1 = match(pattern[0], ck1)
-        m2 = match(pattern[1], ck2)
-        m3 = match(pattern[2], ck3)
-        # optionally print summary (counts) instead of full arrays
-        print(f"    CK match pattern {pattern} → counts ({np.sum(m1)},{np.sum(m2)},{np.sum(m3)})")
-        return m1 & m2 & m3
+        """
+        Cherenkov pattern matcher (Option A: 0 = don't care, 1 = must fire)
+
+        pattern : tuple of 3 ints (0 or 1)
+        ck1, ck2, ck3 : arrays of Cherenkov amplitudes
+        cherenkov_cut : threshold value for 'firing'
+        """
+
+        # Start with all events allowed
+        m = np.ones(len(ck1), dtype=bool)
+
+        # CK1
+        if pattern[0] == 1:
+            m &= (ck1 > cherenkov_cut)
+
+        # CK2
+        if pattern[1] == 1:
+            m &= (ck2 > cherenkov_cut)
+
+        # CK3
+        if pattern[2] == 1:
+            m &= (ck3 > cherenkov_cut)
+
+        # Debug print: number of events satisfying required fired channels
+        print(f"CK pattern {pattern} → matched {np.sum(m)} events")
+
+        return m
+
+    
 
     is_muon = (mu > muon_threshold)
+    pos_ck = (ck1 > cherenkov_cut) & (ck2 > cherenkov_cut) & (ck3 > cherenkov_cut)
 
     is_positron = (
-        (psd > 5000) & (ck_match(ck_pos)) &
+        (psd > 5000) &
+        pos_ck &
         (mu < muon_threshold)
     )
 
-    is_hadron = (psd < 5000) & (mu < muon_threshold)
+    is_hadron = (psd < 5000) & (psd > 1000) & (mu < muon_threshold)
 
     is_pion   = is_hadron & ck_match(ck_pi)
     is_kaon   = is_hadron & ck_match(ck_k)
@@ -246,11 +277,51 @@ def run_beam(beam_type, filedict):
     plt.grid(True, alpha=0.3)
     plt.legend()
 
-    pdfname = os.path.join(outdir, f"beam_fractions_{beam_type}.pdf")
+    pdfname = os.path.join(outdir, f"beam_fractions_PSD_fired_{beam_type}.pdf")
     plt.savefig(pdfname)
     plt.close()
 
     print(f"Saved plot → {pdfname}\n")
+
+    ## Counts instead of fractions
+    mu_counts = [int(r["muon"]*1e4) for r in results]      # scale back to approximate counts
+    e_counts  = [int(r["positron"]*1e4) for r in results]
+    pi_counts = [int(r["pion"]*1e4) for r in results]
+    k_counts  = [int(r["kaon"]*1e4) for r in results]
+    p_counts  = [int(r["proton"]*1e4) for r in results]
+
+    print("\nPlotting grouped bar chart...")
+
+    x = np.arange(len(energies))           # positions of energy groups
+    n_bars = 5                             # number of particle types
+    width = 0.25                           # width of each bar
+    spacing = 0.02                         # extra spacing between groups
+
+    # Shift bars to center around each energy
+    offsets = np.linspace(-2*width, 2*width, n_bars)
+
+    plt.figure(figsize=(12,6))
+
+    plt.bar(x + offsets[0], mu_counts, width, label="Muon",     color="purple")
+    plt.bar(x + offsets[1], e_counts,  width, label="Positron", color="blue")
+    plt.bar(x + offsets[2], pi_counts, width, label="Pion",     color="red")
+    plt.bar(x + offsets[3], k_counts,  width, label="Kaon",     color="green")
+    plt.bar(x + offsets[4], p_counts,  width, label="Proton",   color="black")
+
+    plt.xlabel("Energy (GeV)", fontsize=16)
+    plt.ylabel("Events", fontsize=16)
+    plt.title(f"Particle Countes per Energy — {beam_type}", fontsize=18)
+    plt.xticks(x, energies, fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.grid(axis='y', alpha=0.3)
+    plt.legend(fontsize=12)
+
+    plt.tight_layout()
+    pdfname = os.path.join(outdir, f"beam_counts_grouped_PSD_fired_{beam_type}_.pdf")
+    plt.savefig(pdfname)
+    plt.close()
+
+    print(f"Saved grouped bar chart → {pdfname}\n")
 
 # ============================================================
 # Run everything

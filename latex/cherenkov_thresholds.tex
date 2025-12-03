@@ -1,0 +1,146 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{cite}
+
+\title{Cherenkov Counter Thresholds and Response for Helium Radiator}
+\author{Akshat Shrivastava}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document presents the methodology, calculations, and results for the three-pressure (0.3, 0.6 and 1.0 bar) Helium radiator Cherenkov counters used in the test-beam setup. The particle species considered are electrons/positrons, pions, kaons and protons, and beam momenta cover the range 5--160 GeV. The physics of Cherenkov radiation is reviewed, the threshold conditions derived, and the response of each counter documented. Tables and plots summarise which particle types would fire which counter at each beam momentum.
+\end{abstract}
+
+\section{Introduction}
+Cherenkov detectors are widely used for charged-particle identification by exploiting the fact that a particle must exceed the phase velocity of light in the medium in order to emit Cherenkov radiation. This gives a well-defined threshold in velocity (and thus momentum for a given mass) that depends on the refractive index of the radiator. The present study uses a helium gas radiator at three pressures and evaluates the expected response for a set of beam momenta and particle types in a test-beam environment.
+
+\section{Theory}
+\subsection{Cherenkov emission condition}
+A charged particle of velocity $v$ in a medium of refractive index $n$ emits Cherenkov radiation if
+\[
+v > \frac{c}{n}, 
+\quad\text{or}\quad
+\beta \equiv \frac{v}{c} > \frac{1}{n}.
+\]
+At threshold one has
+\[
+\beta_{\rm thr} = \frac{1}{n}.
+\]
+
+\subsection{Velocity and momentum relation}
+Relativistically we have
+\[
+\beta = \frac{p}{\sqrt{p^2 + m^2}},
+\]
+where $p$ is the momentum (in GeV/c) and $m$ is the rest mass (in GeV/c$^2$). Equivalently the Lorentz factor is
+\[
+\gamma = \frac{1}{\sqrt{1 - \beta^2}}
+      = \frac{\sqrt{p^2 + m^2}}{m}.
+\]
+
+\subsection{Momentum threshold}
+Setting $\beta = 1/n$ in the above gives
+\[
+\frac{1}{n} = \frac{p_{\rm th}}{\sqrt{p_{\rm th}^2 + m^2}}
+\quad\Longrightarrow\quad
+p_{\rm th} = \frac{m}{\sqrt{n^2 - 1}}.
+\]
+This standard result is found in many detector-physics texts \cite{Leo1994,Knoll2010,PDG2024}.
+
+\subsection{Refractive index and pressure scaling}
+For a dilute gas, the refractive-index excess $(n-1)$ is approximately proportional to the gas number density, hence to pressure $P$ (at fixed temperature):
+\[
+n(P) - 1 = (n_{1\rm bar}-1)\,\frac{P}{1 \text{ bar}}, 
+\]
+where $n_{1\rm bar}-1$ is the value at one bar. Thus
+\[
+n(P) = 1 + (n_{1\rm bar}-1)\,P.
+\]
+Hence if one computes the required refractive index $n_{\min} = 1/\beta$ for emission, the required pressure is
+\[
+P_{\rm req} = \frac{n_{\min} - 1}{\,n_{1\rm bar}-1\,} \text{ bar}.
+\]
+
+\section{Setup and Parameters}
+\subsection{Radiator gas}
+- Gas: Helium (He)  
+- $n_{1\rm bar} - 1 = 3.553 \times 10^{-5}$ at 1 bar and typical wavelength \cite{Palinkas2008}.
+
+\subsection{Counters and pressures}
+Three Cherenkov counters are configured at:
+\[
+P = 0.3 \text{ bar},\;0.6 \text{ bar},\;1.0 \text{ bar}.
+\]
+
+\subsection{Particle species and masses}
+Particles evaluated (with masses from PDG listings):
+\begin{itemize}
+  \item Positron ($e^+$): $m = 0.000511$ GeV/c$^2$ \cite{PDG2024}  
+  \item Pion ($\pi^\pm$): $m = 0.139570$ GeV/c$^2$ \cite{PDG2024}  
+  \item Kaon ($K^\pm$): $m = 0.493677$ GeV/c$^2$ \cite{PDG2024}  
+  \item Proton ($p$): $m = 0.938272$ GeV/c$^2$ \cite{PDG2024}  
+\end{itemize}
+
+\subsection{Beam momenta}
+Beam momenta considered: 5, 10, 20, 30, 40, 60, 80, 100, 120, 160 GeV/c.
+
+\section{Calculation Method}
+Using the script (see Appendix) the following steps were applied for each species and each beam momentum:
+\begin{enumerate}
+  \item Calculate momentum $p$ (if necessary from energy), compute $\beta = p/\sqrt{p^2+m^2}$.  
+  \item For each pressure $P$, compute $n(P) = 1 + (n_{1\rm bar}-1)\,P$.  
+  \item Check if $\beta > 1/n(P)$. If true, the corresponding Cherenkov counter would ``fire''.  
+  \item Record ``Yes'' or ``No'' in a table for the given species, momentum and pressure.  
+  \item Additionally compute the Cherenkov angle (when $\beta n(P) > 1$):
+    \[
+      \theta_C = \arccos\!\Bigl(\frac{1}{n(P)\,\beta}\Bigr).
+    \]
+\end{enumerate}
+
+\section{Results}
+Tables and heat-map panels are generated. Below is an excerpt of the full table (see attached Excel sheet) for illustration:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lrrrrr}
+\toprule
+Particle & Energy & 0.3 bar & 0.6 bar & 1.0 bar \\
+ & (GeV/c) & Fires? & Fires? & Fires? \\
+\midrule
+positron & 5   & Yes & Yes & Yes \\
+pion     & 5   & No  & No  & No  \\
+pion     & 20  & No  & No  & Yes \\
+kaon     & 20  & No  & No  & No  \\
+proton   & 60  & No  & No  & No  \\
+\bottomrule
+\end{tabular}
+\caption{Excerpt of Cherenkov counter response table (Helium gas).}
+\end{table}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=.9\textwidth]{cherenkov_firing_heatmap.pdf}
+\caption{Firing map heat-map for each pressure setting, where green indicates the counter fires and red indicates it does not.}
+\end{figure}
+
+\section{Discussion}
+The results indicate clear separation regions: low-momentum pions (below ~16 GeV) do not fire any counter at 1 bar He, while positrons always fire. As the momentum increases, the heavier particles cross their thresholds sequentially, enabling particle identification by the pattern of counter firings. The multi-pressure approach allows tuning of thresholds to the beam momentum range of interest.
+
+\section{Conclusion}
+We have documented the threshold calculations, provided a table and visualization of expected counter responses, and given the methodology and equations behind the script used. This forms the basis for further experimental work and detector performance studies.
+
+\section*{References}
+\bibliographystyle{unsrt}
+\bibliography{cherenkov_refs}
+
+\appendix
+\section{Script Listing}
+See the Python script \texttt{calculate_cherenkovthresholds.py} used to generate the table and plots.
+
+\end{document}

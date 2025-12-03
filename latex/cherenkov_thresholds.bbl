@@ -1,0 +1,24 @@
+\begin{thebibliography}{1}
+
+\bibitem{Leo1994}
+W.~R. Leo.
+\newblock {\em Techniques for Nuclear and Particle Physics Experiments}.
+\newblock Springer, 2nd edition, 1994.
+
+\bibitem{Knoll2010}
+G.~F. Knoll.
+\newblock {\em Radiation Detection and Measurement}.
+\newblock Wiley, 4th edition, 2010.
+
+\bibitem{PDG2024}
+Particle~Data Group.
+\newblock Review of particle physics — passage of particles through matter
+  and detectors.
+\newblock \url{https://pdg.lbl.gov/}, 2024.
+
+\bibitem{Palinkas2008}
+L.~v.~P{\'a}link{\'a}s and G.~Szab{\'o}.
+\newblock Refractive index of helium at visible wavelengths.
+\newblock {\em Applied Optics}, 47(6):1126--1129, 2008.
+
+\end{thebibliography}

@@ -1,0 +1,108 @@
+Cherenkov Firing Summary
+
+====================================
+
+
+===== e⁺ (mass = 0.000511 GeV) =====
+
+E=  5.00 GeV | β=1.00000 | γ=9784.736 | p=5.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 10.00 GeV | β=1.00000 | γ=19569.472 | p=10.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 20.00 GeV | β=1.00000 | γ=39138.943 | p=20.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 30.00 GeV | β=1.00000 | γ=58708.415 | p=30.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 40.00 GeV | β=1.00000 | γ=78277.886 | p=40.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 60.00 GeV | β=1.00000 | γ=117416.830 | p=60.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 80.00 GeV | β=1.00000 | γ=156555.773 | p=80.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=100.00 GeV | β=1.00000 | γ=195694.716 | p=100.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=120.00 GeV | β=1.00000 | γ=234833.659 | p=120.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=160.00 GeV | β=1.00000 | γ=313111.546 | p=160.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+
+===== μ⁺ (mass = 0.105658 GeV) =====
+
+E=  5.00 GeV | β=0.99978 | γ=47.322 | p=4.999 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 10.00 GeV | β=0.99994 | γ=94.645 | p=9.999 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 20.00 GeV | β=0.99999 | γ=189.290 | p=20.000 GeV | 0.3bar: NO, 0.6bar: FIRE, 1.0bar: FIRE
+E= 30.00 GeV | β=0.99999 | γ=283.935 | p=30.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 40.00 GeV | β=1.00000 | γ=378.580 | p=40.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 60.00 GeV | β=1.00000 | γ=567.870 | p=60.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 80.00 GeV | β=1.00000 | γ=757.160 | p=80.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=100.00 GeV | β=1.00000 | γ=946.450 | p=100.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=120.00 GeV | β=1.00000 | γ=1135.740 | p=120.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=160.00 GeV | β=1.00000 | γ=1514.320 | p=160.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+
+===== π⁺ (mass = 0.139570 GeV) =====
+
+E=  5.00 GeV | β=0.99961 | γ=35.824 | p=4.998 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 10.00 GeV | β=0.99990 | γ=71.648 | p=9.999 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 20.00 GeV | β=0.99998 | γ=143.297 | p=20.000 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: FIRE
+E= 30.00 GeV | β=0.99999 | γ=214.945 | p=30.000 GeV | 0.3bar: NO, 0.6bar: FIRE, 1.0bar: FIRE
+E= 40.00 GeV | β=0.99999 | γ=286.594 | p=40.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 60.00 GeV | β=1.00000 | γ=429.891 | p=60.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 80.00 GeV | β=1.00000 | γ=573.187 | p=80.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=100.00 GeV | β=1.00000 | γ=716.484 | p=100.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=120.00 GeV | β=1.00000 | γ=859.781 | p=120.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=160.00 GeV | β=1.00000 | γ=1146.375 | p=160.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+
+===== π⁻ (mass = 0.139570 GeV) =====
+
+E=  5.00 GeV | β=0.99961 | γ=35.824 | p=4.998 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 10.00 GeV | β=0.99990 | γ=71.648 | p=9.999 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 20.00 GeV | β=0.99998 | γ=143.297 | p=20.000 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: FIRE
+E= 30.00 GeV | β=0.99999 | γ=214.945 | p=30.000 GeV | 0.3bar: NO, 0.6bar: FIRE, 1.0bar: FIRE
+E= 40.00 GeV | β=0.99999 | γ=286.594 | p=40.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 60.00 GeV | β=1.00000 | γ=429.891 | p=60.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E= 80.00 GeV | β=1.00000 | γ=573.187 | p=80.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=100.00 GeV | β=1.00000 | γ=716.484 | p=100.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=120.00 GeV | β=1.00000 | γ=859.781 | p=120.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=160.00 GeV | β=1.00000 | γ=1146.375 | p=160.000 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+
+===== K⁺ (mass = 0.493677 GeV) =====
+
+E=  5.00 GeV | β=0.99511 | γ=10.128 | p=4.976 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 10.00 GeV | β=0.99878 | γ=20.256 | p=9.988 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 20.00 GeV | β=0.99970 | γ=40.512 | p=19.994 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 30.00 GeV | β=0.99986 | γ=60.768 | p=29.996 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 40.00 GeV | β=0.99992 | γ=81.025 | p=39.997 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 60.00 GeV | β=0.99997 | γ=121.537 | p=59.998 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: FIRE
+E= 80.00 GeV | β=0.99998 | γ=162.049 | p=79.998 GeV | 0.3bar: NO, 0.6bar: FIRE, 1.0bar: FIRE
+E=100.00 GeV | β=0.99999 | γ=202.562 | p=99.999 GeV | 0.3bar: NO, 0.6bar: FIRE, 1.0bar: FIRE
+E=120.00 GeV | β=0.99999 | γ=243.074 | p=119.999 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=160.00 GeV | β=1.00000 | γ=324.099 | p=159.999 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+
+===== K⁻ (mass = 0.493677 GeV) =====
+
+E=  5.00 GeV | β=0.99511 | γ=10.128 | p=4.976 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 10.00 GeV | β=0.99878 | γ=20.256 | p=9.988 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 20.00 GeV | β=0.99970 | γ=40.512 | p=19.994 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 30.00 GeV | β=0.99986 | γ=60.768 | p=29.996 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 40.00 GeV | β=0.99992 | γ=81.025 | p=39.997 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 60.00 GeV | β=0.99997 | γ=121.537 | p=59.998 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: FIRE
+E= 80.00 GeV | β=0.99998 | γ=162.049 | p=79.998 GeV | 0.3bar: NO, 0.6bar: FIRE, 1.0bar: FIRE
+E=100.00 GeV | β=0.99999 | γ=202.562 | p=99.999 GeV | 0.3bar: NO, 0.6bar: FIRE, 1.0bar: FIRE
+E=120.00 GeV | β=0.99999 | γ=243.074 | p=119.999 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+E=160.00 GeV | β=1.00000 | γ=324.099 | p=159.999 GeV | 0.3bar: FIRE, 0.6bar: FIRE, 1.0bar: FIRE
+
+===== K* (892) (mass = 0.895550 GeV) =====
+
+E=  5.00 GeV | β=0.98383 | γ=5.583 | p=4.919 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 10.00 GeV | β=0.99598 | γ=11.166 | p=9.960 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 20.00 GeV | β=0.99900 | γ=22.333 | p=19.980 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 30.00 GeV | β=0.99955 | γ=33.499 | p=29.987 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 40.00 GeV | β=0.99975 | γ=44.665 | p=39.990 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 60.00 GeV | β=0.99989 | γ=66.998 | p=59.993 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 80.00 GeV | β=0.99994 | γ=89.331 | p=79.995 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E=100.00 GeV | β=0.99996 | γ=111.663 | p=99.996 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E=120.00 GeV | β=0.99997 | γ=133.996 | p=119.997 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: FIRE
+E=160.00 GeV | β=0.99998 | γ=178.661 | p=159.997 GeV | 0.3bar: NO, 0.6bar: FIRE, 1.0bar: FIRE
+
+===== proton (mass = 0.938272 GeV) =====
+
+E=  5.00 GeV | β=0.98224 | γ=5.329 | p=4.911 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 10.00 GeV | β=0.99559 | γ=10.658 | p=9.956 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 20.00 GeV | β=0.99890 | γ=21.316 | p=19.978 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 30.00 GeV | β=0.99951 | γ=31.974 | p=29.985 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 40.00 GeV | β=0.99972 | γ=42.632 | p=39.989 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 60.00 GeV | β=0.99988 | γ=63.947 | p=59.993 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E= 80.00 GeV | β=0.99993 | γ=85.263 | p=79.994 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E=100.00 GeV | β=0.99996 | γ=106.579 | p=99.996 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: NO
+E=120.00 GeV | β=0.99997 | γ=127.895 | p=119.996 GeV | 0.3bar: NO, 0.6bar: NO, 1.0bar: FIRE
+E=160.00 GeV | β=0.99998 | γ=170.526 | p=159.997 GeV | 0.3bar: NO, 0.6bar: FIRE, 1.0bar: FIRE
